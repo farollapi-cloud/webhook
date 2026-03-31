@@ -52,6 +52,16 @@ O repositório inclui [`render.yaml`](render.yaml) (Blueprint): **webhook-api** 
 
 Limites do [plano gratuito](https://render.com/docs/free): serviço web pode hibernar após inatividade; Postgres free expira em 90 dias (ver documentação atual da Render).
 
+### Login no site dá erro / “Falha ao conectar”
+
+São **dois serviços** (API e Static Site). O login do navegador chama a **API** usando a URL gravada no **build** do frontend.
+
+1. **No Static Site** (não na API): variável **`VITE_API_URL`** = URL **https** do **Web Service da API** (ex.: `https://webhook-api.onrender.com`), **sem barra no final**. Depois de alterar, faça **novo deploy** do Static Site (o Vite embute o valor na hora do build).
+2. **No Web Service da API**: variável **`CORS_ORIGINS`** = URL **https** do **Static Site** (ex.: `https://webhook-frontend-pb6s.onrender.com`), **sem barra no final**. Salve e redeploy/restart se precisar.
+3. **No Web Service da API**: **`AUTH_CLIENT_ID`** e **`AUTH_CLIENT_SECRET`** = os mesmos valores que você digita na tela de login.
+
+Na tela de login, o texto **“Chamadas vão para: …”** mostra qual URL o site está usando. Se aparecer `localhost`, o `VITE_API_URL` não foi definido no build do Static Site.
+
 ## Endpoints principais (API)
 
 | Método | Rota | Descrição |
