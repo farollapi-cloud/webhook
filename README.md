@@ -62,3 +62,14 @@ Os testes usam SQLite em arquivo temporário (não exigem PostgreSQL).
 ## Variáveis de ambiente
 
 Ver `.env.example`.
+
+## Publicar no GitHub
+
+Repositório remoto sugerido: [farollapi-cloud/webhook](https://github.com/farollapi-cloud/webhook).
+
+```bash
+git remote add origin https://github.com/farollapi-cloud/webhook.git   # se ainda não existir
+git push -u origin main
+```
+
+Se aparecer **403 Permission denied**, a conta Git no PC não tem permissão de escrita na organização. Use uma conta com acesso ao org, um **Personal Access Token** com escopo `repo` ao usar HTTPS, ou configure **SSH** (`git@github.com:farollapi-cloud/webhook.git`) com chave autorizada no GitHub.
