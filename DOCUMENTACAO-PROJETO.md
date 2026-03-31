@@ -223,7 +223,19 @@ Para a lista exata de commits: `git log --oneline` no repositório local.
 
 ---
 
-## 12. Onde tirar dúvida rápida
+## 12. Deploy na Render: “No open ports” / “Timed Out”
+
+A plataforma verifica se o processo **escuta** em `0.0.0.0:$PORT` e se o **health check** retorna **200**.
+
+- O **start command** correto é: `uvicorn app.main:app --host 0.0.0.0 --port $PORT` (já no [`render.yaml`](render.yaml)).
+- Se o health check do painel apontar para **`/`** e a API não tiver rota na raiz, a resposta era **404** e o deploy podia falhar. Por isso existe **`GET /`** em [`app/main.py`](app/main.py) com **200** e o blueprint usa `healthCheckPath: /`.
+- O arquivo [`runtime.txt`](runtime.txt) fixa **Python 3.12.x** no build na Render (evita surpresas com versões muito novas, ex. 3.14).
+
+No painel do Web Service, confira **Health Check Path**: use **`/`** ou **`/health`** (ambos respondem OK).
+
+---
+
+## 13. Onde tirar dúvida rápida
 
 | Dúvida | Onde olhar |
 |--------|------------|

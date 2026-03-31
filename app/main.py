@@ -36,6 +36,12 @@ app.add_middleware(
 app.include_router(api_v1, prefix="/api/v1")
 
 
+@app.get("/", tags=["health"])
+def root() -> dict[str, str]:
+    """Responde 200 na raiz — evita falha de health check se o painel usar `/` em vez de `/health`."""
+    return {"status": "ok", "service": "webhook-saas-api"}
+
+
 @app.get("/health", tags=["health"])
 def health() -> dict[str, str]:
     return {"status": "ok", "environment": settings.environment}
