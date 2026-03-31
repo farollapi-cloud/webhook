@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-border: oklch(0.9 0.01 280);
+  --color-input: oklch(0.9 0.01 280);
+  --color-ring: oklch(0.55 0.2 280);
+  --color-background: oklch(0.985 0.005 280);
+  --color-foreground: oklch(0.2 0.02 280);
+  --color-muted: oklch(0.96 0.01 280);
+  --color-muted-foreground: oklch(0.45 0.02 280);
+  --color-primary: oklch(0.48 0.22 280);
+  --color-primary-foreground: oklch(0.99 0 0);
+  --color-destructive: oklch(0.55 0.22 25);
+  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.2 0.02 280);
+  --radius-lg: 0.75rem;
+  --radius-md: calc(0.75rem - 2px);
+  --radius-sm: calc(0.75rem - 4px);
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-border: oklch(0.28 0.02 280);
+    --color-input: oklch(0.28 0.02 280);
+    --color-ring: oklch(0.65 0.18 280);
+    --color-background: oklch(0.14 0.02 280);
+    --color-foreground: oklch(0.96 0.01 280);
+    --color-muted: oklch(0.2 0.02 280);
+    --color-muted-foreground: oklch(0.65 0.02 280);
+    --color-primary: oklch(0.72 0.18 280);
+    --color-primary-foreground: oklch(0.12 0.02 280);
+    --color-destructive: oklch(0.6 0.2 25);
+    --color-destructive-foreground: oklch(0.99 0 0);
+    --color-card: oklch(0.18 0.02 280);
+    --color-card-foreground: oklch(0.96 0.01 280);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+}

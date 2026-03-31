@@ -1,4 +1,5 @@
 from functools import lru_cache
+import os
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -20,6 +21,13 @@ class Settings(BaseSettings):
     auth_client_secret: str = "change-me-admin-secret"
 
     webhook_max_body_bytes: int = 512 * 1024
+
+    # Origens permitidas para o browser (SPA), separadas por vírgula. Ex.: https://app.onrender.com
+    cors_origins: str = ""
+
+    def resolved_public_base_url(self) -> str:
+        """URL pública da API: Render define RENDER_EXTERNAL_URL no Web Service."""
+        return (os.environ.get("RENDER_EXTERNAL_URL") or self.backend_public_url).rstrip("/")
 
 
 @lru_cache

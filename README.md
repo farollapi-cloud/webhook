@@ -1,75 +1,85 @@
 # Webhook SaaS (multiempresa)
 
-Backend em **FastAPI** + **PostgreSQL**: cadastro de empresas, números WhatsApp (Uazapi), geração estável de webhook por número, recepção de eventos e API para integrações.
+Backend em **FastAPI** + **PostgreSQL** e **frontend** em **React (Vite)**: cadastro de empresas, números WhatsApp (Uazapi), webhooks e painel web.
 
 Documento de requisitos: `PROMPT-ARQUITETURA.md`.
 
 ## Requisitos
 
 - Python 3.11+
-- PostgreSQL 16+ (ou use `docker compose up -d`)
+- Node 20+ (para o frontend)
+- PostgreSQL 16+ local (ou `docker compose up -d`)
 
-## Configuração
+## Backend (local)
 
-1. Copie `.env.example` para `.env` e ajuste `SECRET_KEY`, `AUTH_CLIENT_SECRET` e `DATABASE_URL`.
-2. Crie o schema:
+1. Copie `.env.example` para `.env` e ajuste `SECRET_KEY`, `AUTH_CLIENT_SECRET`, `DATABASE_URL` e `CORS_ORIGINS` (ex.: `http://localhost:5173`).
+2. Migrações:
 
 ```bash
 alembic upgrade head
 ```
 
-3. Suba o servidor:
+3. API:
 
 ```bash
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-4. Obtenha token de gestão:
+4. Token de gestão: `POST /api/v1/auth/token` com `client_id` e `client_secret` (ver `.env.example`).
 
-```http
-POST /api/v1/auth/token
-Content-Type: application/json
+## Frontend (local)
 
-{"client_id": "admin", "client_secret": "<AUTH_CLIENT_SECRET>"}
+```bash
+cd frontend
+cp .env.example .env
+# Edite VITE_API_URL se a API não estiver em http://localhost:8000
+npm install
+npm run dev
 ```
 
-Use `Authorization: Bearer <access_token>` nas rotas de empresas e números.
+Abra o endereço indicado pelo Vite (geralmente `http://localhost:5173`). Faça login com as mesmas credenciais `AUTH_CLIENT_ID` / `AUTH_CLIENT_SECRET` da API.
 
-## Endpoints principais
+## Deploy na Render (API + Static Site + Postgres)
+
+O repositório inclui [`render.yaml`](render.yaml) (Blueprint): **webhook-api** (Python), **webhook-web** (site estático) e **webhook-db** (PostgreSQL).
+
+1. No [Render Dashboard](https://dashboard.render.com), crie um **Blueprint** apontando para este repositório (arquivo `render.yaml` na raiz).
+2. No primeiro deploy, o painel pedirá valores para variáveis `sync: false`:
+   - **`CORS_ORIGINS`**: URL pública do site estático (ex.: `https://webhook-web.onrender.com`). Sem barra final.
+   - **`VITE_API_URL`**: URL pública **da API** (ex.: `https://webhook-api.onrender.com`). Sem barra final. O build do frontend embute esse valor.
+3. A API usa automaticamente **`RENDER_EXTERNAL_URL`** (injetada pela Render) para montar URLs de webhook quando `BACKEND_PUBLIC_URL` não foi definido — ou seja, os webhooks da Uazapi devem apontar para a **URL do serviço `webhook-api`**, não do static site.
+4. Após o primeiro deploy da API, copie a URL pública do **webhook-api**, preencha `VITE_API_URL` e `CORS_ORIGINS` e faça **redeploy** do **webhook-web** se necessário.
+
+Limites do [plano gratuito](https://render.com/docs/free): serviço web pode hibernar após inatividade; Postgres free expira em 90 dias (ver documentação atual da Render).
+
+## Endpoints principais (API)
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | POST | `/api/v1/auth/token` | Token JWT (gestão) |
 | POST/GET/PATCH | `/api/v1/companies` | CRUD empresas |
-| POST | `/api/v1/companies/{id}/phone-numbers` | Cria número + gera webhook (retorna URL completa uma vez) |
+| POST | `/api/v1/companies/{id}/phone-numbers` | Cria número + gera webhook |
 | GET | `/api/v1/companies/{id}/phone-numbers` | Lista números |
-| GET | `/api/v1/companies/{id}/phone-numbers/{pid}` | Detalhe (URL completa não reexibida) |
-| GET | `/api/v1/companies/{id}/phone-numbers/{pid}/webhook` | Prefixo + mensagem |
-| POST | `/api/v1/companies/{id}/phone-numbers/{pid}/webhook/regenerate` | Novo token + nova URL |
-| POST | `/api/v1/phone-numbers/{id}/webhook/regenerate` | Idem (atalho) |
-| * | `/api/v1/webhooks/whatsapp/{company_id}/{phone_number_id}/{token}` | Recebimento Uazapi (público) |
+| GET | `/api/v1/companies/{id}/phone-numbers/{pid}` | Detalhe |
+| POST | `.../webhook/regenerate` | Novo token + nova URL |
+| * | `/api/v1/webhooks/whatsapp/...` | Recebimento Uazapi (público) |
 
-O token do webhook é armazenado apenas como **hash**; a URL completa só aparece na criação do número ou após regeneração.
-
-## Testes
+## Testes (backend)
 
 ```bash
 python -m pytest tests/ -v
 ```
 
-Os testes usam SQLite em arquivo temporário (não exigem PostgreSQL).
-
 ## Variáveis de ambiente
 
-Ver `.env.example`.
+- Raiz: `.env.example`
+- Frontend: `frontend/.env.example`
 
 ## Publicar no GitHub
 
-Repositório remoto sugerido: [farollapi-cloud/webhook](https://github.com/farollapi-cloud/webhook).
-
 ```bash
-git remote add origin https://github.com/farollapi-cloud/webhook.git   # se ainda não existir
+git remote add origin https://github.com/farollapi-cloud/webhook.git
 git push -u origin main
 ```
 
-Se aparecer **403 Permission denied**, a conta Git no PC não tem permissão de escrita na organização. Use uma conta com acesso ao org, um **Personal Access Token** com escopo `repo` ao usar HTTPS, ou configure **SSH** (`git@github.com:farollapi-cloud/webhook.git`) com chave autorizada no GitHub.
+Se aparecer **403**, verifique permissões na organização ou use PAT/SSH.
