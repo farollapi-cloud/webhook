@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: webhook_saas
+    ports:
+      - "5432:5432"
+    volumes:
+      - webhook_pg_data:/var/lib/postgresql/data
+
+volumes:
+  webhook_pg_data:
