@@ -4,6 +4,8 @@ Backend em **FastAPI** + **PostgreSQL** e **frontend** em **React (Vite)**: cada
 
 Documento de requisitos: `PROMPT-ARQUITETURA.md`.
 
+**Documentação detalhada do que foi feito, variáveis, GitHub e Render:** [`DOCUMENTACAO-PROJETO.md`](DOCUMENTACAO-PROJETO.md).
+
 ## Requisitos
 
 - Python 3.11+
