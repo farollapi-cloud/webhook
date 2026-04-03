@@ -16,13 +16,16 @@ jobs:
         with:
           fetch-depth: 0
       - name: Mirror to gfmcosta08
+        env:
+          GFMCOSTA_TOKEN: ${{ secrets.GFMCOSTA_TOKEN }}
         run: |
           git config user.email "bot@mirror"
           git config user.name "Mirror Bot"
-          git remote add mirror https://x-access-token:${{ secrets.GFMCOSTA_TOKEN }}@github.com/gfmcosta08/${{ github.event.repository.name }}.git
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token ${{ secrets.GFMCOSTA_TOKEN }}" "https://api.github.com/repos/gfmcosta08/${{ github.event.repository.name }}")
+          git config --global http.extraheader ""
+          git remote add mirror https://x-access-token:${GFMCOSTA_TOKEN}@github.com/gfmcosta08/${{ github.event.repository.name }}.git
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token ${GFMCOSTA_TOKEN}" "https://api.github.com/repos/gfmcosta08/${{ github.event.repository.name }}")
           if [ "$STATUS" = "404" ]; then
-            curl -s -X POST -H "Authorization: token ${{ secrets.GFMCOSTA_TOKEN }}" -H "Content-Type: application/json" -d "{\"name\":\"${{ github.event.repository.name }}\",\"private\":${{ github.event.repository.private }}}" "https://api.github.com/user/repos"
+            curl -s -X POST -H "Authorization: token ${GFMCOSTA_TOKEN}" -H "Content-Type: application/json" -d "{\"name\":\"${{ github.event.repository.name }}\",\"private\":${{ github.event.repository.private }}}" "https://api.github.com/user/repos"
             sleep 3
           fi
           git push mirror --mirror --force
