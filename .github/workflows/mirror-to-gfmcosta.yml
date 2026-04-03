@@ -1,11 +1,12 @@
 name: Mirror to gfmcosta08
 
-on:
+"on":
   push:
     branches:
       - '**'
   delete: {}
   create: {}
+  workflow_dispatch: {}
 
 jobs:
   mirror:
